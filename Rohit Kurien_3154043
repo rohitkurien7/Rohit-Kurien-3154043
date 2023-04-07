@@ -1,0 +1,88 @@
+import random
+import time
+import sys
+import os
+import platform
+import winsound
+
+# Set the range of the random number
+MIN_NUMBER = 1
+MAX_NUMBER = 100
+
+# Initialize high score
+high_score = None
+
+# Set up platform-specific sound playing
+if platform.system() == 'Windows':
+    def play_sound():
+        winsound.PlaySound('SystemAsterisk', winsound.SND_ALIAS)
+else:
+    def play_sound():
+        os.system('echo -n "\a"')
+
+
+# Play the game
+def play_game():
+    # Generate the random number
+    secret_number = random.randint(MIN_NUMBER, MAX_NUMBER)
+    print("I'm thinking of a number between", MIN_NUMBER, "and", MAX_NUMBER)
+    time.sleep(1)
+    print("Can you guess what it is? Enter 'quit' to exit the game.")
+
+    # Keep track of the number of guesses
+    num_guesses = 0
+
+    # Start the timer
+    start_time = time.time()
+
+    # Loop until the user guesses the correct number or quits
+    while True:
+        try:
+            guess = input("Enter your guess: ")
+            if guess == 'quit':
+                print("Thanks for playing!")
+                sys.exit()
+            guess = int(guess)
+            if guess < MIN_NUMBER or guess > MAX_NUMBER:
+                print("Invalid guess. Please enter a number between", MIN_NUMBER, "and", MAX_NUMBER)
+            else:
+                num_guesses += 1
+                if guess < secret_number:
+                    print("Too low. Try again.")
+                elif guess > secret_number:
+                    print("Too high. Try again.")
+                else:
+                    end_time = time.time()
+                    elapsed_time = end_time - start_time
+                    print("Congratulations! You guessed the number in", num_guesses, "guesses and",
+                          round(elapsed_time, 2), "seconds!")
+                    # Update high score if necessary
+                    global high_score
+                    if high_score is None or num_guesses < high_score[0] or (
+                            num_guesses == high_score[0] and elapsed_time < high_score[1]):
+                        high_score = (num_guesses, elapsed_time)
+                        print("New high score!")
+                    play_sound()
+                    break
+        except ValueError:
+            print("Invalid input. Please enter a number.")
+
+
+# Run the game
+while True:
+    play_game()
+    # Prompt the user to play again or quit
+    while True:
+        play_again = input("Would you like to play again? (y/n): ")
+        if play_again.lower() == 'n':
+            sys.exit()
+        elif play_again.lower() == 'y':
+            break
+        else:
+            print("Invalid input. Please enter 'y' or 'n'.")
+
+# Print high score
+if high_score is not None:
+    print("High score: {} guesses in {} seconds".format(high_score[0], round(high_score[1], 2)))
+else:
+    print("No high score yet. Play the game to set a high score!")
